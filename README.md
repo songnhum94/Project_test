@@ -43,3 +43,7 @@ Once Node.js is installed, follow these steps in your terminal (VS Code terminal
 -   **UI Components**: Material UI (MUI)
 -   **Icons**: Lucide React & MUI Icons
 -   **Animations**: Framer Motion & HTML5 Canvas
+
+
+
+ผมแปลงภาษาให้แล้ว แก้ไปบ้างส่วนแล้ว แต่ตรง NAVBAR ผมไม่รู้จะเขียนยังไงไม่เป็นครับ 
