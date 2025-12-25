@@ -111,43 +111,84 @@ const SpaceBackground = () => {
             }
         }
 
-        // --- Rocket Class ---
+        // --- Rocket Class (Modified) ---
         class Rocket {
             constructor() {
-                this.x = canvas.width / 2;
-                this.y = canvas.height / 2;
-                this.angle = 0;
-                this.radius = 150; // Orbit radius
-                this.speed = 0.02;
+                this.reset();
+            }
+
+            reset() {
+                // Randomize spawn edge: 0=top, 1=right, 2=bottom, 3=left
+                const edge = Math.floor(Math.random() * 4);
+
+                if (edge === 0) { // Top
+                    this.x = Math.random() * canvas.width;
+                    this.y = -50;
+                    this.angle = Math.PI / 2 + (Math.random() - 0.5); // Downwards-ish
+                } else if (edge === 1) { // Right
+                    this.x = canvas.width + 50;
+                    this.y = Math.random() * canvas.height;
+                    this.angle = Math.PI + (Math.random() - 0.5); // Leftwards-ish
+                } else if (edge === 2) { // Bottom
+                    this.x = Math.random() * canvas.width;
+                    this.y = canvas.height + 50;
+                    this.angle = -Math.PI / 2 + (Math.random() - 0.5); // Upwards-ish
+                } else { // Left
+                    this.x = -50;
+                    this.y = Math.random() * canvas.height;
+                    this.angle = 0 + (Math.random() - 0.5); // Rightwards-ish
+                }
+
+                this.speed = Math.random() * 3 + 1; // Random speed
+                this.size = Math.random() * 0.5 + 0.5; // Random size
             }
 
             update() {
-                this.angle += this.speed;
-                this.x = canvas.width / 2 + Math.cos(this.angle) * this.radius;
-                this.y = canvas.height / 2 + Math.sin(this.angle) * this.radius;
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed;
+
+                // Reset if far off screen
+                if (this.x < -100 || this.x > canvas.width + 100 ||
+                    this.y < -100 || this.y > canvas.height + 100) {
+                    this.reset();
+                }
             }
 
             draw() {
                 ctx.save();
                 ctx.translate(this.x, this.y);
-                ctx.rotate(this.angle + Math.PI / 2); // Point forward
+                ctx.rotate(this.angle + Math.PI / 2); // Point forward (assuming rocket sprite points UP)
+                ctx.scale(this.size, this.size);
 
-                // Simple Rocket Shape
-                ctx.fillStyle = '#ff0055';
+                // Rocket Body
+                ctx.fillStyle = '#e2e8f0';
                 ctx.beginPath();
-                ctx.moveTo(0, -20);
-                ctx.lineTo(10, 10);
-                ctx.lineTo(-10, 10);
-                ctx.closePath();
+                ctx.ellipse(0, 0, 10, 30, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Rocket Window
+                ctx.fillStyle = '#38bdf8';
+                ctx.beginPath();
+                ctx.arc(0, -5, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Fins
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.moveTo(-10, 10);
+                ctx.lineTo(-20, 30);
+                ctx.lineTo(-5, 25);
+                ctx.moveTo(10, 10);
+                ctx.lineTo(20, 30);
+                ctx.lineTo(5, 25);
                 ctx.fill();
 
                 // Flame
-                ctx.fillStyle = '#ffcc00';
+                ctx.fillStyle = `rgba(255, ${Math.random() * 100 + 100}, 0, 0.8)`;
                 ctx.beginPath();
-                ctx.moveTo(-5, 10);
-                ctx.lineTo(5, 10);
-                ctx.lineTo(0, 25 + Math.random() * 10); // Flicker
-                ctx.closePath();
+                ctx.moveTo(-5, 25);
+                ctx.lineTo(5, 25);
+                ctx.lineTo(0, 45 + Math.random() * 15);
                 ctx.fill();
 
                 ctx.restore();
@@ -157,7 +198,8 @@ const SpaceBackground = () => {
         // Initialize Objects
         const stars = Array.from({ length: 150 }, () => new Star());
         const comets = Array.from({ length: 3 }, () => new Comet());
-        const rocket = new Rocket();
+        // Create 5 rockets
+        const rockets = Array.from({ length: 5 }, () => new Rocket());
 
         // Animation Loop
         const animate = () => {
@@ -183,8 +225,10 @@ const SpaceBackground = () => {
                 comet.draw();
             });
 
-            rocket.update();
-            rocket.draw();
+            rockets.forEach(rocket => {
+                rocket.update();
+                rocket.draw();
+            });
 
             animationFrameId = requestAnimationFrame(animate);
         };
